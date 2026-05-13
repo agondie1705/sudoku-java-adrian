@@ -1,5 +1,4 @@
 # sudoku-java-adrian
-```markdown
 ## 📌 UML — Class Diagram
 
 El diagrama completo está en `docs/uml/class-diagram.md`, pero aquí tienes una vista rápida:
@@ -24,3 +23,4 @@ classDiagram
         +addError()
         +isGameOver()
     }
+```
