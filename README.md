@@ -230,3 +230,9 @@ JaCoCo
 La documentación completa del código está disponible en:
 
 [docs/javadoc/](docs/javadoc/)
+## 🏁 Versión Final
+
+**Release:** v1.0  
+**Fecha:** Mayo 2026  
+**Autor:** Adrian  
+**Estado:** Completado ✅
