@@ -21,14 +21,14 @@
   <build>
     <plugins>
 
-      <!-- Maven Surefire Plugin (ejecuta tests JUnit 5) -->
+      <!-- Maven Surefire Plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.1.2</version>
       </plugin>
 
-      <!-- JaCoCo (cobertura de tests) -->
+      <!-- JaCoCo Plugin -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -47,6 +47,18 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <!-- Javadoc Plugin configurado correctamente -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.12.0</version>
+        <configuration>
+          <sourcepath>src/main/java</sourcepath>
+          <excludePackageNames>com.sudoku.service.*Test</excludePackageNames>
+          <failOnError>false</failOnError>
+        </configuration>
       </plugin>
 
     </plugins>

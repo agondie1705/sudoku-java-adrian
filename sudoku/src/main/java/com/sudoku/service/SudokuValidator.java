@@ -1,4 +1,13 @@
 package com.sudoku.service;
+/**
+ * Validates if a move is correct according to Sudoku rules.
+ *
+ * @param board current board
+ * @param row row index
+ * @param col column index
+ * @param number number to validate
+ * @return true if valid
+ */
 
 public class SudokuValidator {
 

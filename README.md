@@ -224,3 +224,9 @@ Mermaid
 JUnit 5
 
 JaCoCo
+
+## 📚 Javadoc
+
+La documentación completa del código está disponible en:
+
+[docs/javadoc/](docs/javadoc/)
