@@ -78,7 +78,7 @@ classDiagram
     MainWindow --> GameManager
     MainWindow --> BoardManager
 ```
-```mermaid
+
 flowchart TD
 
 A[Start Game] --> B[Generate Full Board]
@@ -97,4 +97,4 @@ F -->|No| J[Add Error]
 J --> K{Errors >= 3?}
 K -->|Yes| L[Show "GAME OVER"]
 K -->|No| D
-```
+
