@@ -169,7 +169,25 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void checkVictory() {
-        // Aquí luego comprobarás si el sudoku está completo
+ // PASO 12 — Comprobar si el tablero está completo
+    private boolean isBoardComplete() {
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                if (board[row][col] == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
+
+    // PASO 13 — Comprobar victoria
+    private void checkVictory() {
+        if (isBoardComplete()) {
+            gameManager.setVictory(true);
+            JOptionPane.showMessageDialog(this, "HAS GANADO");
+            disableBoard();
+        }
+    }
+
 }
