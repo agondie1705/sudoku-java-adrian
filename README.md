@@ -225,7 +225,13 @@ JUnit 5
 
 JaCoCo
 
-## 📚 Javadoc
+
+## 🔒 Branch Protection
+
+La rama `main` está protegida:
+- No se permiten pushes directos.
+- Solo merges mediante Pull Requests.
+- CI/CD debe pasar correctamente antes de integrar cambios.
 
 La documentación completa del código está disponible en:
 
