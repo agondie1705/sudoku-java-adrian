@@ -4,6 +4,7 @@ import java.awt.event.KeyAdapter;
 import com.sudoku.service.SudokuGenerator;
 import com.sudoku.service.SudokuSolver;
 import com.sudoku.service.SudokuValidator;
+import com.sudoku.utils.FormatUtils;
 import com.sudoku.service.GameManager;
 import com.sudoku.model.Difficulty;
 import com.sudoku.service.BoardManager;
@@ -230,7 +231,8 @@ public class MainWindow extends JFrame {
     private void updateTimeLabel() {
         int minutes = elapsedSeconds / 60;
         int seconds = elapsedSeconds % 60;
-        timeLabel.setText(String.format("Time: %02d:%02d", minutes, seconds));
+        timeLabel.setText("Time: " + FormatUtils.formatTime(elapsedSeconds));
+
     }
 
     private void onSolveClicked() {
