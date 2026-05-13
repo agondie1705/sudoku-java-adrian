@@ -22,8 +22,11 @@ public class MainWindow extends JFrame {
     private JTextField[][] cells;
     private int[][] generatedBoard;
 
-    // 🔥 PASO 9 — Label de errores
     private JLabel errorLabel;
+
+    private Timer timer;
+    private int elapsedSeconds;
+    private JLabel timeLabel;
 
     public MainWindow() {
 
@@ -37,7 +40,7 @@ public class MainWindow extends JFrame {
 
         initializeWindow();
         createBoard();
-        createBottomPanel(); // 🔥 Añadido aquí
+        createBottomPanel();
         setVisible(true);
     }
 
@@ -85,7 +88,6 @@ public class MainWindow extends JFrame {
                     cell.setText("");
                 }
 
-                // Solo permite números del 1 al 9
                 cell.addKeyListener(new KeyAdapter() {
                     @Override
                     public void keyTyped(KeyEvent e) {
@@ -96,7 +98,6 @@ public class MainWindow extends JFrame {
                     }
                 });
 
-                // Listener de acción
                 final int r = row;
                 final int c = col;
                 cell.addActionListener(e -> onCellInput(r, c));
@@ -108,7 +109,6 @@ public class MainWindow extends JFrame {
         add(boardPanel, BorderLayout.CENTER);
     }
 
-    // 🔥 PASO 9 — Crear panel inferior con contador de errores
     private void createBottomPanel() {
 
         errorLabel = new JLabel("Errors: 0 / " + gameManager.getMaxErrors());
@@ -116,10 +116,25 @@ public class MainWindow extends JFrame {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         bottomPanel.add(errorLabel);
 
+        elapsedSeconds = 0;
+        timeLabel = new JLabel("Time: 00:00");
+
+        timer = new Timer(1000, e -> {
+            elapsedSeconds++;
+            updateTimeLabel();
+        });
+
+        timer.start();
+
+        bottomPanel.add(timeLabel);
+
+        JButton solveButton = new JButton("Solve");
+        solveButton.addActionListener(e -> onSolveClicked());
+        bottomPanel.add(solveButton);
+
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    // 🔥 Método que ya integraste antes, ahora funcional con errorLabel
     private void onCellInput(int row, int col) {
 
         if (gameManager.isGameOver()) {
@@ -155,21 +170,22 @@ public class MainWindow extends JFrame {
         }
     }
 
-    // 🔥 PASO 9 — Actualizar contador de errores
     private void updateErrorLabel() {
         errorLabel.setText("Errors: " + gameManager.getErrors() + " / " + gameManager.getMaxErrors());
     }
 
-    // 🔥 PASO 10 — Desactivar tablero
     private void disableBoard() {
         for (int row = 0; row < 9; row++) {
             for (int col = 0; col < 9; col++) {
                 cells[row][col].setEditable(false);
             }
         }
+
+        if (timer != null) {
+            timer.stop();
+        }
     }
 
- // PASO 12 — Comprobar si el tablero está completo
     private boolean isBoardComplete() {
         for (int row = 0; row < 9; row++) {
             for (int col = 0; col < 9; col++) {
@@ -181,7 +197,6 @@ public class MainWindow extends JFrame {
         return true;
     }
 
-    // PASO 13 — Comprobar victoria
     private void checkVictory() {
         if (isBoardComplete()) {
             gameManager.setVictory(true);
@@ -190,4 +205,28 @@ public class MainWindow extends JFrame {
         }
     }
 
+    private void updateTimeLabel() {
+        int minutes = elapsedSeconds / 60;
+        int seconds = elapsedSeconds % 60;
+        String timeText = String.format("Time: %02d:%02d", minutes, seconds);
+        timeLabel.setText(timeText);
+    }
+
+    private void onSolveClicked() {
+
+        com.sudoku.service.SudokuGenerator solver = new com.sudoku.service.SudokuGenerator();
+
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                cells[row][col].setText(String.valueOf(board[row][col]));
+                cells[row][col].setEditable(false);
+            }
+        }
+
+        if (timer != null) {
+            timer.stop();
+        }
+
+        JOptionPane.showMessageDialog(this, "Board solved. Game finished.");
+    }
 }
