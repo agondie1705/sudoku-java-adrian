@@ -1,7 +1,14 @@
 package com.sudoku.service;
-
+/**
+ * Solves a Sudoku board using recursive backtracking.
+ */
 public class SudokuSolver {
-
+	/**
+     * Attempts to solve the given Sudoku board.
+     *
+     * @param board 9x9 matrix with zeros as empty cells
+     * @return true if the board is solved
+     */
     public boolean solve(int[][] board) {
 
         for (int row = 0; row < 9; row++) {

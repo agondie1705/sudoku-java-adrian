@@ -3,7 +3,9 @@ package com.sudoku.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+/**
+ * Generates complete Sudoku boards using backtracking.
+ */
 public class SudokuGenerator {
 
     private int[][] board;
@@ -11,7 +13,11 @@ public class SudokuGenerator {
     public SudokuGenerator() {
         board = new int[9][9];
     }
-
+    /**
+     * Generates a full valid Sudoku board.
+     *
+     * @return 9x9 solved board
+     */
     public int[][] generateBoard() {
         fillBoard();
         removeCells(40);
@@ -72,7 +78,7 @@ public class SudokuGenerator {
 
         Collections.shuffle(numbers);
         return numbers;
-    } // ✅ ESTA LLAVE CIERRA EL MÉTODO ANTERIOR
+    }
 
     public void removeCells(int cellsToRemove) {
         while (cellsToRemove > 0) {

@@ -13,7 +13,10 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.util.Random;
-
+/**
+ * Main window of the Sudoku game.
+ * Handles UI, user input, timers and game flow.
+ */
 public class MainWindow extends JFrame {
 
     private int[][] board;
@@ -36,7 +39,10 @@ public class MainWindow extends JFrame {
 
     private Timer timer;
     private int elapsedSeconds;
-
+    /**
+     * Initializes the Sudoku window, generates a new board
+     * and prepares all UI components.
+     */
     public MainWindow() {
 
         this.difficulty = Difficulty.MEDIUM;
@@ -163,7 +169,12 @@ public class MainWindow extends JFrame {
 
         add(bottomPanel, BorderLayout.SOUTH);
     }
-
+    /**
+     * Handles the input of a cell and validates the move.
+     *
+     * @param row row index
+     * @param col column index
+     */
     private void onCellInput(int row, int col) {
 
         if (gameManager.isGameOver()) {
