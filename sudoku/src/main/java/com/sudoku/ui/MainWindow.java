@@ -261,7 +261,6 @@ public class MainWindow extends JFrame {
 
         int cellsToHide = 0;
 
-        // 🔵 MANTENIDO EXACTAMENTE COMO TÚ LO TENÍAS
         switch (difficulty) {
             case EASY:
                 cellsToHide = 10;
