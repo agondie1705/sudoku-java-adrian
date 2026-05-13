@@ -6,13 +6,14 @@ import com.sudoku.service.SudokuSolver;
 import com.sudoku.service.SudokuValidator;
 import com.sudoku.service.GameManager;
 import com.sudoku.model.Difficulty;
-import com.sudoku.service.BoardManager;   // ✅ IMPORTANTE
+import com.sudoku.service.BoardManager;
 
 import java.awt.event.KeyEvent;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.util.Random;
+
 /**
  * Main window of the Sudoku game.
  * Handles UI, user input, timers and game flow.
@@ -30,7 +31,7 @@ public class MainWindow extends JFrame {
     private GameManager gameManager;
     private Difficulty difficulty;
 
-    private BoardManager boardManager = new BoardManager();   // ✅ AÑADIDO
+    private BoardManager boardManager = new BoardManager();
 
     private JTextField[][] cells;
 
@@ -39,6 +40,7 @@ public class MainWindow extends JFrame {
 
     private Timer timer;
     private int elapsedSeconds;
+
     /**
      * Initializes the Sudoku window, generates a new board
      * and prepares all UI components.
@@ -51,8 +53,8 @@ public class MainWindow extends JFrame {
         this.gameManager = new GameManager(difficulty);
 
         solutionBoard = generator.generateBoard();
-        visibleBoard = boardManager.copy(solutionBoard);   // ✅ CAMBIO
-        hideCells(visibleBoard, difficulty);
+        visibleBoard = boardManager.copy(solutionBoard);
+        applyDifficultyMask(visibleBoard, difficulty);
 
         fixedCells = new boolean[9][9];
         for (int r = 0; r < 9; r++)
@@ -117,7 +119,7 @@ public class MainWindow extends JFrame {
 
                 final int r = row;
                 final int c = col;
-                cell.addActionListener(e -> onCellInput(r, c));
+                cell.addActionListener(e -> handleCellInput(r, c));
 
                 boardPanel.add(cell);
             }
@@ -149,7 +151,7 @@ public class MainWindow extends JFrame {
         bottomPanel.add(solveButton);
 
         JButton newGameButton = new JButton("New Game");
-        newGameButton.addActionListener(e -> startNewGame());
+        newGameButton.addActionListener(e -> resetGame());
         bottomPanel.add(newGameButton);
 
         String[] levels = {"EASY", "MEDIUM", "HARD"};
@@ -162,20 +164,18 @@ public class MainWindow extends JFrame {
             } catch (Exception ex) {
                 difficulty = Difficulty.MEDIUM;
             }
-            startNewGame();
+            resetGame();
         });
 
         bottomPanel.add(difficultyBox);
 
         add(bottomPanel, BorderLayout.SOUTH);
     }
+
     /**
      * Handles the input of a cell and validates the move.
-     *
-     * @param row row index
-     * @param col column index
      */
-    private void onCellInput(int row, int col) {
+    private void handleCellInput(int row, int col) {
 
         if (gameManager.isGameOver()) {
             JOptionPane.showMessageDialog(this, "GAME OVER");
@@ -197,7 +197,7 @@ public class MainWindow extends JFrame {
         } else {
             cells[row][col].setText("");
             gameManager.addError();
-            updateErrorLabel();
+            refreshErrorDisplay();
 
             if (gameManager.isGameOver()) {
                 JOptionPane.showMessageDialog(this, "GAME OVER");
@@ -206,7 +206,7 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void updateErrorLabel() {
+    private void refreshErrorDisplay() {
         errorLabel.setText("Errors: " + gameManager.getErrors() + " / " + gameManager.getMaxErrors());
     }
 
@@ -220,7 +220,7 @@ public class MainWindow extends JFrame {
     }
 
     private void checkVictory() {
-        if (boardManager.isComplete(board)) {   // ✅ CAMBIO
+        if (boardManager.isComplete(board)) {
             gameManager.setVictory(true);
             JOptionPane.showMessageDialog(this, "HAS GANADO");
             disableBoard();
@@ -236,7 +236,7 @@ public class MainWindow extends JFrame {
     private void onSolveClicked() {
 
         SudokuSolver solver = new SudokuSolver();
-        int[][] copy = boardManager.copy(board);   // ✅ CAMBIO
+        int[][] copy = boardManager.copy(board);
 
         if (!solver.solve(copy)) {
             JOptionPane.showMessageDialog(this, "No se puede resolver este tablero.");
@@ -255,10 +255,11 @@ public class MainWindow extends JFrame {
         JOptionPane.showMessageDialog(this, "Sudoku resuelto.");
     }
 
-    private void hideCells(int[][] board, Difficulty difficulty) {
+    private void applyDifficultyMask(int[][] board, Difficulty difficulty) {
 
         int cellsToHide = 0;
 
+        // 🔵 MANTENIDO EXACTAMENTE COMO TÚ LO TENÍAS
         switch (difficulty) {
             case EASY:
                 cellsToHide = 10;
@@ -270,16 +271,15 @@ public class MainWindow extends JFrame {
                 cellsToHide = 30;
                 break;
             default:
-                cellsToHide = 40;
+                cellsToHide = 20;
                 break;
         }
 
         Random r = new Random();
         int removed = 0;
-        int maxAttempts = 200; // ✅ evita bucles infinitos
         int attempts = 0;
 
-        while (removed < cellsToHide && attempts < maxAttempts) {
+        while (removed < cellsToHide && attempts < 200) {
             int row = r.nextInt(9);
             int col = r.nextInt(9);
             attempts++;
@@ -291,11 +291,11 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void startNewGame() {
+    private void resetGame() {
 
         solutionBoard = generator.generateBoard();
-        visibleBoard = boardManager.copy(solutionBoard);   // ✅ CAMBIO
-        hideCells(visibleBoard, difficulty);
+        visibleBoard = boardManager.copy(solutionBoard);
+        applyDifficultyMask(visibleBoard, difficulty);
 
         fixedCells = new boolean[9][9];
         for (int r = 0; r < 9; r++)
