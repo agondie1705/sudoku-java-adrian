@@ -77,6 +77,40 @@ classDiagram
         +addError()
         +isGameOver()
     }
+```
+```mermaid
+classDiagram
+    class SudokuBoard {
+        -int[][] board
+        +getValue(row, col)
+        +setValue(row, col, value)
+    }
+
+    class SudokuGenerator {
+        +generateBoard()
+        -solveBoard()
+        -isValid()
+    }
+
+    class SudokuSolver {
+        +solve(board)
+        -isValid()
+    }
+
+    class SudokuValidator {
+        +isValidMove(board, row, col, number)
+    }
+
+    class GameManager {
+        -int errors
+        -int maxErrors
+        -boolean gameOver
+        -boolean victory
+        +addError()
+        +isGameOver()
+        +isVictory()
+        +reset()
+    }
 
     class BoardManager {
         +copy(board)
@@ -84,11 +118,21 @@ classDiagram
     }
 
     class MainWindow {
+        -JTextField[][] cells
+        -Timer timer
+        -int[][] solutionBoard
+        -int[][] visibleBoard
         +resetGame()
         +handleCellInput()
     }
-🔄 Flujo del Juego (Activity Diagram)
-mermaid
+
+    SudokuGenerator --> SudokuBoard
+    SudokuSolver --> SudokuBoard
+    SudokuValidator --> SudokuBoard
+    MainWindow --> GameManager
+    MainWindow --> BoardManager
+```
+```mermaid
 flowchart TD
 
 A[Start Game] --> B[Generate Full Board]
@@ -100,13 +144,16 @@ E --> F{Correct?}
 
 F -->|Yes| G[Update Board]
 G --> H{Board Complete?}
-H -->|Yes| I[Show "HAS GANADO"]
+H -->|Yes| I[Show HAS GANADO]
 H -->|No| D
 
 F -->|No| J[Add Error]
 J --> K{Errors >= 3?}
-K -->|Yes| L[Show "GAME OVER"]
+K -->|Yes| L[Show GAME OVER]
 K -->|No| D
+
+```
+
 🧪 Testing
 JUnit 5
 
