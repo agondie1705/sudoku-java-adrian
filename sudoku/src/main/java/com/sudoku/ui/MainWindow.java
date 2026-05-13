@@ -1,6 +1,11 @@
 package com.sudoku.ui;
+
 import java.awt.event.KeyAdapter;
 import com.sudoku.service.SudokuGenerator;
+import com.sudoku.service.SudokuValidator;
+import com.sudoku.service.GameManager;
+import com.sudoku.model.Difficulty;
+
 import java.awt.event.KeyEvent;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -8,106 +13,220 @@ import java.awt.*;
 
 public class MainWindow extends JFrame {
 
-	private JTextField[][] cells;
-	private SudokuGenerator generator;
-	private int[][] generatedBoard;
-	public MainWindow() {
-		generator = new SudokuGenerator();
+    private int[][] board;
+    private SudokuGenerator generator;
+    private SudokuValidator validator;
+    private GameManager gameManager;
+    private Difficulty difficulty;
 
-		generatedBoard = generator.generateBoard();
-		
-		initializeWindow();
+    private JTextField[][] cells;
+    private int[][] generatedBoard;
 
-		createBoard();
+    private JLabel errorLabel;
 
-		setVisible(true);
-	}
+    private Timer timer;
+    private int elapsedSeconds;
+    private JLabel timeLabel;
 
-	private void initializeWindow() {
+    public MainWindow() {
 
-		setTitle("Sudoku");
+        this.difficulty = Difficulty.MEDIUM;
+        this.generator = new SudokuGenerator();
+        this.validator = new SudokuValidator();
+        this.gameManager = new GameManager(difficulty);
 
-		setSize(700, 700);
+        this.board = generator.generateBoard();
+        this.generatedBoard = board;
 
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        initializeWindow();
+        createBoard();
+        createBottomPanel();
+        setVisible(true);
+    }
 
-		setLocationRelativeTo(null);
+    private void initializeWindow() {
 
-		setLayout(new BorderLayout());
+        setTitle("Sudoku");
+        setSize(700, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+    }
 
-	}
+    private void createBoard() {
 
-	private void createBoard() {
+        JPanel boardPanel = new JPanel();
+        boardPanel.setLayout(new GridLayout(9, 9));
 
-		JPanel boardPanel = new JPanel();
+        cells = new JTextField[9][9];
+        Font cellFont = new Font("Arial", Font.BOLD, 20);
 
-		boardPanel.setLayout(new GridLayout(9, 9));
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
 
-		cells = new JTextField[9][9];
+                JTextField cell = new JTextField();
+                cell.setHorizontalAlignment(JTextField.CENTER);
+                cell.setFont(cellFont);
 
-		Font cellFont = new Font("Arial", Font.BOLD, 20);
+                int top = (row % 3 == 0) ? 3 : 1;
+                int left = (col % 3 == 0) ? 3 : 1;
+                int bottom = (row == 8) ? 3 : 1;
+                int right = (col == 8) ? 3 : 1;
 
-		for (int row = 0; row < 9; row++) {
+                Border border = BorderFactory.createMatteBorder(
+                        top, left, bottom, right, Color.BLACK
+                );
 
-			for (int col = 0; col < 9; col++) {
+                cell.setBorder(border);
+                cells[row][col] = cell;
 
-				JTextField cell = new JTextField();
+                cell.setText(String.valueOf(generatedBoard[row][col]));
 
-				cell.setHorizontalAlignment(JTextField.CENTER);
+                if (generatedBoard[row][col] != 0) {
+                    cell.setEditable(false);
+                } else {
+                    cell.setText("");
+                }
 
-				cell.setFont(cellFont);
+                cell.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        char input = e.getKeyChar();
+                        if (!Character.isDigit(input) || input == '0') {
+                            e.consume();
+                        }
+                    }
+                });
 
-				int top = (row % 3 == 0) ? 3 : 1;
-				int left = (col % 3 == 0) ? 3 : 1;
-				int bottom = (row == 8) ? 3 : 1;
-				int right = (col == 8) ? 3 : 1;
+                final int r = row;
+                final int c = col;
+                cell.addActionListener(e -> onCellInput(r, c));
 
-				Border border = BorderFactory.createMatteBorder(
-						top,
-						left,
-						bottom,
-						right,
-						Color.BLACK
-						);
+                boardPanel.add(cell);
+            }
+        }
 
-				cell.setBorder(border);
+        add(boardPanel, BorderLayout.CENTER);
+    }
 
-				cells[row][col] = cell;
+    private void createBottomPanel() {
 
+        errorLabel = new JLabel("Errors: 0 / " + gameManager.getMaxErrors());
 
-				cell.setText(String.valueOf(generatedBoard[row][col]));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.add(errorLabel);
 
-				if (generatedBoard[row][col] != 0) {
+        elapsedSeconds = 0;
+        timeLabel = new JLabel("Time: 00:00");
 
-				    cell.setEditable(false);
+        timer = new Timer(1000, e -> {
+            elapsedSeconds++;
+            updateTimeLabel();
+        });
 
-				} else {
+        timer.start();
 
-				    cell.setText("");
+        bottomPanel.add(timeLabel);
 
-				}
-				//solo permite numeros bloquea las letras
-				cell.addKeyListener(new KeyAdapter() {
+        JButton solveButton = new JButton("Solve");
+        solveButton.addActionListener(e -> onSolveClicked());
+        bottomPanel.add(solveButton);
 
-					@Override
-					public void keyTyped(KeyEvent e) {
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
 
-						char input = e.getKeyChar();
+    private void onCellInput(int row, int col) {
 
-						if (!Character.isDigit(input)
-								|| input == '0') {
+        if (gameManager.isGameOver()) {
+            JOptionPane.showMessageDialog(this, "GAME OVER");
+            return;
+        }
 
-							e.consume();
+        String text = cells[row][col].getText().trim();
 
-						}
-					}
-				});
-				boardPanel.add(cell);
+        if (text.isEmpty()) {
+            return;
+        }
 
-			}
-		}
+        if (!text.matches("[1-9]")) {
+            cells[row][col].setText("");
+            return;
+        }
 
-		add(boardPanel, BorderLayout.CENTER);
+        int number = Integer.parseInt(text);
 
-	}
+        if (validator.isValidMove(board, row, col, number)) {
+            board[row][col] = number;
+            checkVictory();
+        } else {
+            cells[row][col].setText("");
+            gameManager.addError();
+            updateErrorLabel();
+
+            if (gameManager.isGameOver()) {
+                JOptionPane.showMessageDialog(this, "GAME OVER");
+                disableBoard();
+            }
+        }
+    }
+
+    private void updateErrorLabel() {
+        errorLabel.setText("Errors: " + gameManager.getErrors() + " / " + gameManager.getMaxErrors());
+    }
+
+    private void disableBoard() {
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                cells[row][col].setEditable(false);
+            }
+        }
+
+        if (timer != null) {
+            timer.stop();
+        }
+    }
+
+    private boolean isBoardComplete() {
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                if (board[row][col] == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void checkVictory() {
+        if (isBoardComplete()) {
+            gameManager.setVictory(true);
+            JOptionPane.showMessageDialog(this, "HAS GANADO");
+            disableBoard();
+        }
+    }
+
+    private void updateTimeLabel() {
+        int minutes = elapsedSeconds / 60;
+        int seconds = elapsedSeconds % 60;
+        String timeText = String.format("Time: %02d:%02d", minutes, seconds);
+        timeLabel.setText(timeText);
+    }
+
+    private void onSolveClicked() {
+
+        com.sudoku.service.SudokuGenerator solver = new com.sudoku.service.SudokuGenerator();
+
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                cells[row][col].setText(String.valueOf(board[row][col]));
+                cells[row][col].setEditable(false);
+            }
+        }
+
+        if (timer != null) {
+            timer.stop();
+        }
+
+        JOptionPane.showMessageDialog(this, "Board solved. Game finished.");
+    }
 }
