@@ -1,5 +1,6 @@
 package com.sudoku.ui;
 import java.awt.event.KeyAdapter;
+import com.sudoku.service.SudokuGenerator;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -8,9 +9,13 @@ import java.awt.*;
 public class MainWindow extends JFrame {
 
 	private JTextField[][] cells;
-
+	private SudokuGenerator generator;
+	private int[][] generatedBoard;
 	public MainWindow() {
+		generator = new SudokuGenerator();
 
+		generatedBoard = generator.generateBoard();
+		
 		initializeWindow();
 
 		createBoard();
@@ -68,6 +73,19 @@ public class MainWindow extends JFrame {
 				cell.setBorder(border);
 
 				cells[row][col] = cell;
+
+
+				cell.setText(String.valueOf(generatedBoard[row][col]));
+
+				if (generatedBoard[row][col] != 0) {
+
+				    cell.setEditable(false);
+
+				} else {
+
+				    cell.setText("");
+
+				}
 				//solo permite numeros bloquea las letras
 				cell.addKeyListener(new KeyAdapter() {
 
