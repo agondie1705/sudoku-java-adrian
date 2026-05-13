@@ -13,7 +13,6 @@ import java.awt.*;
 
 public class MainWindow extends JFrame {
 
-    // 🔥 Atributos añadidos arriba de la clase
     private int[][] board;
     private SudokuGenerator generator;
     private SudokuValidator validator;
@@ -23,22 +22,22 @@ public class MainWindow extends JFrame {
     private JTextField[][] cells;
     private int[][] generatedBoard;
 
+    // 🔥 PASO 9 — Label de errores
+    private JLabel errorLabel;
+
     public MainWindow() {
 
-        // 🔥 Inicialización obligatoria según tu instrucción
-        this.difficulty = Difficulty.MEDIUM; // por defecto
+        this.difficulty = Difficulty.MEDIUM;
         this.generator = new SudokuGenerator();
         this.validator = new SudokuValidator();
         this.gameManager = new GameManager(difficulty);
 
-        // Generar tablero completo
         this.board = generator.generateBoard();
-
-        // Mantengo tu variable original para no romper nada
         this.generatedBoard = board;
 
         initializeWindow();
         createBoard();
+        createBottomPanel(); // 🔥 Añadido aquí
         setVisible(true);
     }
 
@@ -97,10 +96,80 @@ public class MainWindow extends JFrame {
                     }
                 });
 
+                // Listener de acción
+                final int r = row;
+                final int c = col;
+                cell.addActionListener(e -> onCellInput(r, c));
+
                 boardPanel.add(cell);
             }
         }
 
         add(boardPanel, BorderLayout.CENTER);
+    }
+
+    // 🔥 PASO 9 — Crear panel inferior con contador de errores
+    private void createBottomPanel() {
+
+        errorLabel = new JLabel("Errors: 0 / " + gameManager.getMaxErrors());
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.add(errorLabel);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    // 🔥 Método que ya integraste antes, ahora funcional con errorLabel
+    private void onCellInput(int row, int col) {
+
+        if (gameManager.isGameOver()) {
+            JOptionPane.showMessageDialog(this, "GAME OVER");
+            return;
+        }
+
+        String text = cells[row][col].getText().trim();
+
+        if (text.isEmpty()) {
+            return;
+        }
+
+        if (!text.matches("[1-9]")) {
+            cells[row][col].setText("");
+            return;
+        }
+
+        int number = Integer.parseInt(text);
+
+        if (validator.isValidMove(board, row, col, number)) {
+            board[row][col] = number;
+            checkVictory();
+        } else {
+            cells[row][col].setText("");
+            gameManager.addError();
+            updateErrorLabel();
+
+            if (gameManager.isGameOver()) {
+                JOptionPane.showMessageDialog(this, "GAME OVER");
+                disableBoard();
+            }
+        }
+    }
+
+    // 🔥 PASO 9 — Actualizar contador de errores
+    private void updateErrorLabel() {
+        errorLabel.setText("Errors: " + gameManager.getErrors() + " / " + gameManager.getMaxErrors());
+    }
+
+    // 🔥 PASO 10 — Desactivar tablero
+    private void disableBoard() {
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                cells[row][col].setEditable(false);
+            }
+        }
+    }
+
+    private void checkVictory() {
+        // Aquí luego comprobarás si el sudoku está completo
     }
 }
