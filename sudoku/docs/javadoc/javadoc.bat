@@ -1,1 +1,0 @@
-cmd.exe /X /D /C "C:\Users\tresc\.p2\pool\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.8.v20250724-1412\jre\bin\javadoc.exe -J-Duser.language= -J-Duser.country= @options @argfile"
