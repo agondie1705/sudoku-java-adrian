@@ -263,13 +263,13 @@ public class MainWindow extends JFrame {
 
         switch (difficulty) {
             case EASY:
-                cellsToHide = 10;
+                cellsToHide = 1;
                 break;
             case MEDIUM:
-                cellsToHide = 20;
+                cellsToHide = 10;
                 break;
             case HARD:
-                cellsToHide = 30;
+                cellsToHide = 20;
                 break;
             default:
                 cellsToHide = 20;
