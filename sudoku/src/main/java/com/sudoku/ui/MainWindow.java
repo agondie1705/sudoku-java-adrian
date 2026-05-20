@@ -53,7 +53,12 @@ public class MainWindow extends JFrame {
         this.validator = new SudokuValidator();
         this.gameManager = new GameManager(difficulty);
 
-        solutionBoard = generator.generateBoard();
+        // ✅ CAMBIO 1: generar solución real usando el solver
+        int[][] tempBoard = generator.generateBoard();
+        SudokuSolver solver = new SudokuSolver();
+        solver.solve(tempBoard);                 // resuelve el tablero
+        solutionBoard = boardManager.copy(tempBoard); // solución completa
+
         visibleBoard = boardManager.copy(solutionBoard);
         applyDifficultyMask(visibleBoard, difficulty);
 
@@ -185,27 +190,36 @@ public class MainWindow extends JFrame {
 
         String text = cells[row][col].getText().trim();
         if (text.isEmpty()) return;
+
+        // Asegurar que solo hay un dígito válido
         if (!text.matches("[1-9]")) {
             cells[row][col].setText("");
             return;
         }
 
-        int number = Integer.parseInt(text);
+        int number = Character.getNumericValue(text.charAt(0));
+
+        System.out.println("Fila " + row + ", Col " + col +
+                " | Introducido: " + number +
+                " | Solución: " + solutionBoard[row][col]);
 
         if (number == solutionBoard[row][col]) {
             board[row][col] = number;
+            cells[row][col].setEditable(false);
+            cells[row][col].setForeground(Color.DARK_GRAY);
+            updateCompletedNumbers();
             checkVictory();
         } else {
             cells[row][col].setText("");
             gameManager.addError();
             refreshErrorDisplay();
-
             if (gameManager.isGameOver()) {
                 JOptionPane.showMessageDialog(this, "GAME OVER");
                 disableBoard();
             }
         }
     }
+
 
     private void refreshErrorDisplay() {
         errorLabel.setText("Errors: " + gameManager.getErrors() + " / " + gameManager.getMaxErrors());
@@ -263,16 +277,16 @@ public class MainWindow extends JFrame {
 
         switch (difficulty) {
             case EASY:
-                cellsToHide = 1;
+                cellsToHide = 30;
                 break;
             case MEDIUM:
-                cellsToHide = 10;
+                cellsToHide = 40;
                 break;
             case HARD:
-                cellsToHide = 20;
+                cellsToHide = 50;
                 break;
             default:
-                cellsToHide = 20;
+                cellsToHide = 50;
                 break;
         }
 
@@ -294,7 +308,12 @@ public class MainWindow extends JFrame {
 
     private void resetGame() {
 
-        solutionBoard = generator.generateBoard();
+        // ✅ CAMBIO 2: misma lógica que en el constructor
+        int[][] tempBoard = generator.generateBoard();
+        SudokuSolver solver = new SudokuSolver();
+        solver.solve(tempBoard);
+        solutionBoard = boardManager.copy(tempBoard);
+
         visibleBoard = boardManager.copy(solutionBoard);
         applyDifficultyMask(visibleBoard, difficulty);
 
@@ -326,5 +345,10 @@ public class MainWindow extends JFrame {
                 }
             }
         }
+    }
+
+    private void updateCompletedNumbers() {
+        // Si no usas el panel de números, deja este método vacío
+        // para que no dé error al compilar.
     }
 }
